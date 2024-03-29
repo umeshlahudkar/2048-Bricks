@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameplayController : MonoBehaviour
 {
@@ -11,30 +12,40 @@ public class GameplayController : MonoBehaviour
         Instance = this;
     }
 
+    [SerializeField] private TextMeshProUGUI nextNumberText;
+    [SerializeField] private Block moverBlock;
+    [SerializeField] private BoardGenerator boardGenerator;
+  
     private int gridRows;
     private int gridColoumns;
     public Block[,] blockGrid;
-
-    public MoverBlock moverBlock;
 
     [SerializeField] private float normalTimeDelta;
     private float fastTimeDelta;
     private float currentTimeDelta;
     private float elapcedTime;
 
-    public BoardGenerator boardGenerator;
-
-
+    private int currentNumber;
+    private int nextNumber;
 
     private void Start()
     {
         currentTimeDelta = normalTimeDelta;
         fastTimeDelta = normalTimeDelta / 4;
 
+        nextNumber = GetBlockNumber();
+
         boardGenerator.GenerateBoard(this);
 
         Block block = blockGrid[0, 2];
-        moverBlock.InitBlock(block.Row_ID, block.Column_ID, block.ThisRectTransform.position, block.ThisRectTransform.sizeDelta, string.Empty);
+        moverBlock.InitBlock(block.Row_ID, block.Column_ID, block.ThisRectTransform.position, block.ThisRectTransform.sizeDelta);
+        UpdateBlockNumber();
+    }
+
+    private int GetBlockNumber()
+    {
+        int exponent = Random.Range(1, 7);
+        return (int)Mathf.Pow(2, exponent);
     }
 
     public void InitGrid(int row, int col)
@@ -48,7 +59,7 @@ public class GameplayController : MonoBehaviour
     {
         if(IsValid(row, col))
         {
-            moverBlock.SetBlockIndex(row, col);
+            moverBlock.SetBlockIndexIDs(row, col);
             moverBlock.ThisRectTransform.position = blockGrid[row, col].ThisRectTransform.position;
         }
     }
@@ -108,12 +119,23 @@ public class GameplayController : MonoBehaviour
                 else
                 {
                     // place block
-                    blockGrid[row, col].PlaceBlock(000);
+                    blockGrid[row, col].PlaceBlock(currentNumber);
                     SetMoverBlockPos(0, 2);
                     currentTimeDelta = normalTimeDelta;
+
+                    UpdateBlockNumber();
                 }
                 break;
         }
+    }
+
+    private void UpdateBlockNumber()
+    {
+        currentNumber = nextNumber;
+        nextNumber = GetBlockNumber();
+
+        nextNumberText.text = nextNumber.ToString();
+        moverBlock.UpdateBlockNumber(currentNumber);
     }
 
     private bool IsValid(int row, int col)

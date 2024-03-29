@@ -9,8 +9,8 @@ public class Block : MonoBehaviour
     [SerializeField] private TextMeshProUGUI numbetText;
     [SerializeField] private Image blockImg;
     [SerializeField] private RectTransform rectTransform;
-    protected int rowID;
-    protected int columnID;
+    private int rowID;
+    private int columnID;
 
     private bool isEmpty;
     private int blockNumber;
@@ -22,8 +22,10 @@ public class Block : MonoBehaviour
     public RectTransform ThisRectTransform { get { return rectTransform; } }
 
     public bool IsEmpty { get { return isEmpty; } }
+
+    public int BlockNumber { get { return blockNumber; } }
     
-    public virtual void InitBlock(int row, int col, Vector3 pos, Vector2 size, string name)
+    public void InitBlock(int row, int col, Vector3 pos, Vector2 size, string name)
     {
         rowID = row;
         columnID = col;
@@ -33,11 +35,31 @@ public class Block : MonoBehaviour
         isEmpty = true;
     }
 
+    public void InitBlock(int row, int col, Vector3 pos, Vector2 size)
+    {
+        rowID = row;
+        columnID = col;
+        rectTransform.position = pos;
+        rectTransform.sizeDelta = size;
+    }
+
     public void PlaceBlock(int number)
     {
         isEmpty = false;
         blockNumber = number;
         numbetText.text = number.ToString();
         gameObject.SetActive(true);
+    }
+
+    public void UpdateBlockNumber(int number)
+    {
+        blockNumber = number;
+        numbetText.text = blockNumber.ToString();
+    }
+
+    public void SetBlockIndexIDs(int row, int col)
+    {
+        rowID = row;
+        columnID = col;
     }
 }
