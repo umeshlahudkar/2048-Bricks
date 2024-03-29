@@ -37,6 +37,7 @@ public class Block : MonoBehaviour
     {
         isEmpty = false;
         blockNumber = number;
+        numbetText.text = number.ToString();
         gameObject.SetActive(true);
     }
 }
