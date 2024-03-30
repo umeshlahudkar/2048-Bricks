@@ -15,6 +15,8 @@ public class Block : MonoBehaviour
     private bool isEmpty;
     private int blockNumber;
 
+    private Color blockColor;
+
     public int Row_ID { get { return rowID; } }
 
     public int Column_ID { get { return columnID; } }
@@ -24,7 +26,9 @@ public class Block : MonoBehaviour
     public bool IsEmpty { get { return isEmpty; } }
 
     public int BlockNumber { get { return blockNumber; } }
-    
+
+    public Color BlockColor { get { return blockColor; } }
+
     public void InitBlock(int row, int col, Vector3 pos, Vector2 size, string name)
     {
         rowID = row;
@@ -43,18 +47,23 @@ public class Block : MonoBehaviour
         rectTransform.sizeDelta = size;
     }
 
-    public void PlaceBlock(int number)
+    public void PlaceBlock(int number, Color color)
     {
         isEmpty = false;
         blockNumber = number;
         numbetText.text = number.ToString();
+        blockColor = color;
+        blockImg.color = blockColor;
         gameObject.SetActive(true);
     }
 
-    public void UpdateBlockNumber(int number)
+    public void UpdateBlockNumber(int number, Color color)
     {
         blockNumber = number;
+        blockColor = color;
+
         numbetText.text = blockNumber.ToString();
+        blockImg.color = blockColor;
     }
 
     public void SetBlockIndexIDs(int row, int col)

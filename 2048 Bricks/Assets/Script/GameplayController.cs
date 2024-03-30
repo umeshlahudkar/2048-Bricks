@@ -15,6 +15,7 @@ public class GameplayController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nextNumberText;
     [SerializeField] private Block moverBlock;
     [SerializeField] private BoardGenerator boardGenerator;
+    [SerializeField] private BlockColorData blockColorData;
   
     private int gridRows;
     private int gridColoumns;
@@ -119,7 +120,7 @@ public class GameplayController : MonoBehaviour
                 else
                 {
                     // place block
-                    blockGrid[row, col].PlaceBlock(currentNumber);
+                    blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor);
                     SetMoverBlockPos(0, 2);
                     currentTimeDelta = normalTimeDelta;
 
@@ -135,7 +136,7 @@ public class GameplayController : MonoBehaviour
         nextNumber = GetBlockNumber();
 
         nextNumberText.text = nextNumber.ToString();
-        moverBlock.UpdateBlockNumber(currentNumber);
+        moverBlock.UpdateBlockNumber(currentNumber, blockColorData.GetBlockColor(currentNumber));
     }
 
     private bool IsValid(int row, int col)
