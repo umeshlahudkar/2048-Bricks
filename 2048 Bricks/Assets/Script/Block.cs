@@ -90,7 +90,7 @@ public class Block : MonoBehaviour
         rotationAngle = 0;
     }
 
-    public void SetBlockIndexIDs(int row, int col)
+    public void SetBlockIndex(int row, int col)
     {
         rowID = row;
         columnID = col;

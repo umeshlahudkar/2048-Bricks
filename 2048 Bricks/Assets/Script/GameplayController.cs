@@ -20,8 +20,8 @@ public class GameplayController : MonoBehaviour
     private float currentTimeDelta;
     private float elapcedTime;
 
-    private bool needToReadjustBlockColumn = false;
-    private bool canMove = true;
+    private bool canMoveColumnAfterMerge = false;
+    private bool canInput = true;
 
     private int[] moverBlockRotation = new int[] {0, 90, 180, 270};
 
@@ -60,18 +60,18 @@ public class GameplayController : MonoBehaviour
         blockGrid = new Block[row, col];
     }
 
-    private void SetMoverBlockPos(int row, int col)
+    private void MoveMoverBlockAt(int row, int col)
     {
-        if(IsValid(row, col))
+        if(IsValidIndex(row, col))
         {
-            moverBlock.SetBlockIndexIDs(row, col);
+            moverBlock.SetBlockIndex(row, col);
             moverBlock.ThisRectTransform.position = blockGrid[row, col].ThisRectTransform.position;
         }
     }
 
     private void Update()
     {
-        if(canMove)
+        if(canInput)
         {
             if(Input.GetKeyDown(KeyCode.Space))
             {
@@ -114,37 +114,39 @@ public class GameplayController : MonoBehaviour
         {
             case MoveDirection.Left:
 
-                if( IsValid(row, col - 1) && blockGrid[row, col -1].IsEmpty)
+                if(IsValidIndex(row, col - 1) && blockGrid[row, col -1].IsEmpty)
                 {
-                    SetMoverBlockPos(row, col - 1);
+                    MoveMoverBlockAt(row, col - 1);
                 }
                 break;
 
             case MoveDirection.Right:
 
-                if (IsValid(row, col + 1) && blockGrid[row, col + 1].IsEmpty)
+                if (IsValidIndex(row, col + 1) && blockGrid[row, col + 1].IsEmpty)
                 {
-                    SetMoverBlockPos(row, col + 1);
+                    MoveMoverBlockAt(row, col + 1);
                 }
                 break;
 
             case MoveDirection.Down:
 
-                if (IsValid(row + 1, col) && blockGrid[row + 1, col].IsEmpty)
+                if (IsValidIndex(row + 1, col) && blockGrid[row + 1, col].IsEmpty)
                 {
-                    SetMoverBlockPos(row + 1, col);
+                    MoveMoverBlockAt(row + 1, col);
                 }
                 else
                 {
                     // place block
-                    canMove = false;
-                    if(needToReadjustBlockColumn)
+                    canInput = false;
+                    currentTimeDelta = normalTimeDelta;
+
+                    if (canMoveColumnAfterMerge)
                     {
-                        if (IsValid(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                        if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                         {
                             for (int i = row; i >= 0; i--)
                             {
-                                if (IsValid(i, col + 1) && blockGrid[i, col + 1].IsEmpty && IsValid(i - 1, col + 1) && !blockGrid[i - 1, col + 1].IsEmpty)
+                                if (IsValidIndex(i, col + 1) && blockGrid[i, col + 1].IsEmpty && IsValidIndex(i - 1, col + 1) && !blockGrid[i - 1, col + 1].IsEmpty)
                                 {
                                     blockGrid[i, col + 1].PlaceBlock(blockGrid[i - 1, col + 1].BlockNumber, blockGrid[i - 1, col + 1].BlockColor, blockGrid[i - 1, col + 1].RotationAngle);
                                     blockGrid[i - 1, col + 1].ResetBlock();
@@ -152,11 +154,11 @@ public class GameplayController : MonoBehaviour
                             }
                         }
 
-                        if (IsValid(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                        if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
                         {
                             for (int i = row; i >= 0; i--)
                             {
-                                if (IsValid(i, col - 1) && blockGrid[i, col - 1].IsEmpty && IsValid(i - 1, col - 1) && !blockGrid[i - 1, col - 1].IsEmpty)
+                                if (IsValidIndex(i, col - 1) && blockGrid[i, col - 1].IsEmpty && IsValidIndex(i - 1, col - 1) && !blockGrid[i - 1, col - 1].IsEmpty)
                                 {
                                     blockGrid[i, col - 1].PlaceBlock(blockGrid[i - 1, col - 1].BlockNumber, blockGrid[i - 1, col - 1].BlockColor, blockGrid[i - 1, col - 1].RotationAngle);
                                     blockGrid[i - 1, col - 1].ResetBlock();
@@ -164,43 +166,42 @@ public class GameplayController : MonoBehaviour
                             }
                         }
 
-                        needToReadjustBlockColumn = false;
+                        canMoveColumnAfterMerge = false;
                     }
-                    else if(CanMergeBlocks())
+                    else if(CanMoverBlockMerge())
                     {
                         int newNumber = moverBlock.BlockNumber;
 
                         // vertical down
-                        //if (IsValid(row + 1, col) && !blockGrid[row + 1, col].IsEmpty && blockGrid[row + 1, col].BlockNumber == moverBlock.BlockNumber)
-                        if (CanMergeWithMoverBlock(row + 1, col))
+                        if (CanMoverBlockMergeWith(row + 1, col))
                         {
                             newNumber += blockGrid[row + 1, col].BlockNumber;
                             blockGrid[row + 1, col].ResetBlock();
                         }
 
                         // horizontal right
-                        //if (IsValid(row, col + 1) && !blockGrid[row, col + 1].IsEmpty && blockGrid[row, col + 1].BlockNumber == moverBlock.BlockNumber)
-                        if (CanMergeWithMoverBlock(row, col + 1))
+                        if (CanMoverBlockMergeWith(row, col + 1))
                         {
                             newNumber += blockGrid[row, col + 1].BlockNumber;
                             blockGrid[row, col + 1].ResetBlock();
 
-                            if(IsValid(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                            // checks for - after merge if any blocks are in coloumn of the merged blocks
+                            if(IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                             {
-                                needToReadjustBlockColumn = true;
+                                canMoveColumnAfterMerge = true;
                             }
                         }
 
                         // horizontal left
-                        //if (IsValid(row, col - 1) && !blockGrid[row, col - 1].IsEmpty && blockGrid[row, col - 1].BlockNumber == moverBlock.BlockNumber)
-                        if (CanMergeWithMoverBlock(row, col - 1))
+                        if (CanMoverBlockMergeWith(row, col - 1))
                         {
                             newNumber += blockGrid[row, col - 1].BlockNumber;
                             blockGrid[row, col - 1].ResetBlock();
 
-                            if (IsValid(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                            // checks for - after merge if any blocks are in coloumn of the merged blocks
+                            if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
                             {
-                                needToReadjustBlockColumn = true;
+                                canMoveColumnAfterMerge = true;
                             }
                         }
 
@@ -213,50 +214,45 @@ public class GameplayController : MonoBehaviour
                     }
                     else
                     {
-                        canMove = true;
                         blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor, moverBlock.RotationAngle);
-                        SetMoverBlockPos(0, 2);
-                        currentTimeDelta = normalTimeDelta;
 
-                        UpdateMoverBlock();
-                        UpdateNextBlock();
+                        if(!IsGameOver())
+                        {
+                            MoveMoverBlockAt(0, 2);
+
+                            UpdateMoverBlock();
+                            UpdateNextBlock();
+                            canInput = true;
+                        }
+                        else
+                        {
+                            Debug.Log("Game over");
+                        }
+                        
                     }
                 }
                 break;
         }
     }
 
-    private bool CanMergeBlocks()
+    private bool IsGameOver()
+    {
+        return !blockGrid[0, 2].IsEmpty;
+    }
+
+    private bool CanMoverBlockMerge()
     {
         int row = moverBlock.Row_ID;
         int col = moverBlock.Column_ID;
-
-        bool canMerge = false;
-
-        //if(IsValid(row + 1, col) && !blockGrid[row + 1, col].IsEmpty && blockGrid[row + 1, col].BlockNumber == moverBlock.BlockNumber)
-        if(CanMergeWithMoverBlock(row+1, col))
-        {
-            canMerge |= true;
-        }
-
-        //if (IsValid(row, col + 1) && !blockGrid[row, col + 1].IsEmpty && blockGrid[row, col + 1].BlockNumber == moverBlock.BlockNumber)
-        if (CanMergeWithMoverBlock(row, col + 1))
-        {
-            canMerge |= true;
-        }
-
-        //if (IsValid(row, col - 1) && !blockGrid[row, col - 1].IsEmpty && blockGrid[row, col - 1].BlockNumber == moverBlock.BlockNumber)
-        if (CanMergeWithMoverBlock(row, col - 1))
-        {
-            canMerge |= true;
-        }
-
-        return canMerge;
+       
+        return CanMoverBlockMergeWith(row + 1, col) ||
+           CanMoverBlockMergeWith(row, col + 1) ||
+           CanMoverBlockMergeWith(row, col - 1);
     }
 
-    private bool CanMergeWithMoverBlock(int row, int col)
+    private bool CanMoverBlockMergeWith(int row, int col)
     {
-        return (IsValid(row, col) && !blockGrid[row, col].IsEmpty &&
+        return (IsValidIndex(row, col) && !blockGrid[row, col].IsEmpty &&
              blockGrid[row, col].BlockNumber == moverBlock.BlockNumber && blockGrid[row, col].RotationAngle == moverBlock.RotationAngle);
     }
 
@@ -272,7 +268,7 @@ public class GameplayController : MonoBehaviour
         nextBlock.UpdateBlock(nextNumber, blockColorData.GetBlockColor(nextNumber), angle);
     }
 
-    private bool IsValid(int row, int col)
+    private bool IsValidIndex(int row, int col)
     {
         return (row >= 0 && row < this.gridRows && col >= 0 && col < gridColoumns);
     }
