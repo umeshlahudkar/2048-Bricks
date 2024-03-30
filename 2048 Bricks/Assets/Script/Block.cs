@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -14,6 +12,7 @@ public class Block : MonoBehaviour
 
     private bool isEmpty;
     private int blockNumber;
+    private int rotationAngle;
 
     private Color blockColor;
 
@@ -26,6 +25,8 @@ public class Block : MonoBehaviour
     public bool IsEmpty { get { return isEmpty; } }
 
     public int BlockNumber { get { return blockNumber; } }
+
+    public int RotationAngle { get { return rotationAngle; } }
 
     public Color BlockColor { get { return blockColor; } }
 
@@ -47,23 +48,37 @@ public class Block : MonoBehaviour
         rectTransform.sizeDelta = size;
     }
 
-    public void PlaceBlock(int number, Color color)
+    public void PlaceBlock(int number, Color color, int rotation)
     {
         isEmpty = false;
         blockNumber = number;
         numbetText.text = number.ToString();
         blockColor = color;
         blockImg.color = blockColor;
+        Rotate(rotation);
         gameObject.SetActive(true);
     }
 
-    public void UpdateBlock(int number, Color color)
+    public void UpdateBlock(int number, Color color, int rotation = 0)
     {
         blockNumber = number;
         blockColor = color;
 
         numbetText.text = blockNumber.ToString();
         blockImg.color = blockColor;
+
+        Rotate(rotation);
+    }
+
+    public void Rotate(int rotation)
+    {
+        if(rotation >= 360)
+        {
+            rotation = 0;
+        }
+
+        rotationAngle = rotation;
+        rectTransform.eulerAngles = new Vector3(0, 0, rotationAngle);
     }
 
     public void ResetBlock()
@@ -72,6 +87,7 @@ public class Block : MonoBehaviour
         isEmpty = true;
         blockNumber = 0;
         blockColor = Color.white;
+        rotationAngle = 0;
     }
 
     public void SetBlockIndexIDs(int row, int col)
