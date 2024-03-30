@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BoardGenerator : MonoBehaviour
@@ -13,13 +11,10 @@ public class BoardGenerator : MonoBehaviour
     [Header("Board Canvas")]
     [SerializeField] private RectTransform canvasRect;
 
-    [Header("Background")]
-    [SerializeField] private RectTransform bg;
-
     public void GenerateBoard(GameplayController gameplayController)
     {
         float screenWidth = canvasRect.rect.width;
-        float totalWidth = screenWidth * 0.90f;
+        float totalWidth = screenWidth * 0.80f;
 
         float totalSpace = totalWidth * 0.10f;
         float blockSpace = totalSpace / (colums + 1);
@@ -29,7 +24,7 @@ public class BoardGenerator : MonoBehaviour
 
         float totalHeight = (blockSize * rows) + ((rows + 1) * blockSpace);
 
-        bg.sizeDelta = new Vector2(totalWidth, totalHeight);
+        gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(totalWidth, totalHeight);
 
         GameplayController.Instance.InitGrid(rows, colums);
 
@@ -47,18 +42,9 @@ public class BoardGenerator : MonoBehaviour
             for (int j = 0; j < colums; j++)
             {
                 Block block = Instantiate(blockPrefab, transform);
-                //block.gameObject.name = "Block " + i + " " + j;
-                //block.gameObject.SetActive(true);
-
                 pos.x = currentX;
                 pos.y = currentY;
-
                 sizeDelta.x = sizeDelta.y = blockSize;
-
-                //block.ThisRectTransform.localPosition = new Vector3(currentX, currentY, 0);
-                //block.ThisRectTransform.sizeDelta = new Vector2(blockSize, blockSize);
-                //block.SetBlock(i, j);
-
                 block.InitBlock(i, j, pos, sizeDelta, "Block " + i + " " + j);
 
                 GameplayController.Instance.blockGrid[i, j] = block;
@@ -71,14 +57,14 @@ public class BoardGenerator : MonoBehaviour
         }
     }
 
-    public float GetStartPointX(float blockSize, int columnSize, float blockSpace)
+    private float GetStartPointX(float blockSize, int columnSize, float blockSpace)
     {
         float totalWidth = (blockSize * columnSize) + ((columnSize - 1) * blockSpace);
         return -((totalWidth / 2) - (blockSize / 2));
     }
 
     
-    public float GetStartPointY(float blockSize, int rowSize, float blockSpace)
+    private float GetStartPointY(float blockSize, int rowSize, float blockSpace)
     {
         float totalHeight = (blockSize * rowSize) + ((rowSize - 1) * blockSpace);
         return ((totalHeight / 2) - (blockSize / 2));

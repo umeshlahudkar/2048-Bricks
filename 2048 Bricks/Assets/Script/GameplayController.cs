@@ -48,7 +48,7 @@ public class GameplayController : MonoBehaviour
 
     private int GetBlockNumber()
     {
-        int exponent = Random.Range(1, 3);
+        int exponent = Random.Range(1, 7);
         return (int)Mathf.Pow(2, exponent);
     }
 
