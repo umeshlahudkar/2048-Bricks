@@ -6,6 +6,7 @@ public class BoardGenerator : MonoBehaviour
     [SerializeField] private int rows;
     [SerializeField] private int colums;
 
+    [Header("block Prefab")]
     [SerializeField] private Block blockPrefab;
 
     [Header("Board Canvas")]
@@ -26,7 +27,7 @@ public class BoardGenerator : MonoBehaviour
 
         gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(totalWidth, totalHeight);
 
-        GameplayController.Instance.InitGrid(rows, colums);
+        gameplayController.InitGrid(rows, colums);
 
         float startX = GetStartPointX(blockSize, colums, blockSpace);
         float startY = GetStartPointY(blockSize, rows, blockSpace);
@@ -47,7 +48,7 @@ public class BoardGenerator : MonoBehaviour
                 sizeDelta.x = sizeDelta.y = blockSize;
                 block.InitBlock(i, j, pos, sizeDelta, "Block " + i + " " + j);
 
-                GameplayController.Instance.blockGrid[i, j] = block;
+                gameplayController.blockGrid[i, j] = block;
 
                 currentX = currentX + blockSize + blockSpace;
             }

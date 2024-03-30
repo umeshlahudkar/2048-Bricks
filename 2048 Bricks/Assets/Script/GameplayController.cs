@@ -5,18 +5,12 @@ using TMPro;
 
 public class GameplayController : MonoBehaviour
 {
-    public static GameplayController Instance;
-
-    private void Awake()
-    {
-        Instance = this;
-    }
-
-    [SerializeField] private TextMeshProUGUI nextNumberText;
     [SerializeField] private Block moverBlock;
+    [SerializeField] private Block nextBlock;
+
     [SerializeField] private BoardGenerator boardGenerator;
     [SerializeField] private BlockColorData blockColorData;
-  
+
     private int gridRows;
     private int gridColoumns;
     public Block[,] blockGrid;
@@ -26,24 +20,24 @@ public class GameplayController : MonoBehaviour
     private float currentTimeDelta;
     private float elapcedTime;
 
-    private int currentNumber;
-    private int nextNumber;
-
     private bool needToReadjustBlockColumn = false;
     private bool canMove = true;
+
+    public delegate void BlockMerge(int newNumber);
+    public static BlockMerge OnBlockMerge;
 
     private void Start()
     {
         currentTimeDelta = normalTimeDelta;
         fastTimeDelta = normalTimeDelta / 4;
 
-        nextNumber = GetBlockNumber();
-
         boardGenerator.GenerateBoard(this);
 
         Block block = blockGrid[0, 2];
         moverBlock.InitBlock(block.Row_ID, block.Column_ID, block.ThisRectTransform.position, block.ThisRectTransform.sizeDelta);
-        UpdateBlockNumber();
+
+        UpdateNextBlock();
+        UpdateMoverBlock();
     }
 
     private int GetBlockNumber()
@@ -70,7 +64,7 @@ public class GameplayController : MonoBehaviour
 
     private void Update()
     {
-       if(canMove)
+        if(canMove)
         {
             if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
             {
@@ -131,7 +125,6 @@ public class GameplayController : MonoBehaviour
                     {
                         if (IsValid(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                         {
-                            needToReadjustBlockColumn = true;
                             for (int i = row; i >= 0; i--)
                             {
                                 if (IsValid(i, col + 1) && blockGrid[i, col + 1].IsEmpty && IsValid(i - 1, col + 1) && !blockGrid[i - 1, col + 1].IsEmpty)
@@ -144,7 +137,6 @@ public class GameplayController : MonoBehaviour
 
                         if (IsValid(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
                         {
-                            needToReadjustBlockColumn = true;
                             for (int i = row; i >= 0; i--)
                             {
                                 if (IsValid(i, col - 1) && blockGrid[i, col - 1].IsEmpty && IsValid(i - 1, col - 1) && !blockGrid[i - 1, col - 1].IsEmpty)
@@ -193,6 +185,11 @@ public class GameplayController : MonoBehaviour
                         }
 
                         moverBlock.UpdateBlock(newNumber, blockColorData.GetBlockColor(newNumber));
+                        
+                        if(OnBlockMerge != null)
+                        {
+                            OnBlockMerge.Invoke(newNumber);
+                        }
                     }
                     else
                     {
@@ -201,7 +198,8 @@ public class GameplayController : MonoBehaviour
                         SetMoverBlockPos(0, 2);
                         currentTimeDelta = normalTimeDelta;
 
-                        UpdateBlockNumber();
+                        UpdateMoverBlock();
+                        UpdateNextBlock();
                     }
                 }
                 break;
@@ -233,13 +231,15 @@ public class GameplayController : MonoBehaviour
         return canMerge;
     }
 
-    private void UpdateBlockNumber()
+    private void UpdateMoverBlock()
     {
-        currentNumber = nextNumber;
-        nextNumber = GetBlockNumber();
+        moverBlock.UpdateBlock(nextBlock.BlockNumber, nextBlock.BlockColor);
+    }
 
-        nextNumberText.text = nextNumber.ToString();
-        moverBlock.UpdateBlock(currentNumber, blockColorData.GetBlockColor(currentNumber));
+    private void UpdateNextBlock()
+    {
+        int nextNumber = GetBlockNumber();
+        nextBlock.UpdateBlock(nextNumber, blockColorData.GetBlockColor(nextNumber));
     }
 
     private bool IsValid(int row, int col)
