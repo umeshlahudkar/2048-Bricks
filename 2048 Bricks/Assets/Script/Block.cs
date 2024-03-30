@@ -57,13 +57,21 @@ public class Block : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    public void UpdateBlockNumber(int number, Color color)
+    public void UpdateBlock(int number, Color color)
     {
         blockNumber = number;
         blockColor = color;
 
         numbetText.text = blockNumber.ToString();
         blockImg.color = blockColor;
+    }
+
+    public void ResetBlock()
+    {
+        gameObject.SetActive(false);
+        isEmpty = true;
+        blockNumber = 0;
+        blockColor = Color.white;
     }
 
     public void SetBlockIndexIDs(int row, int col)

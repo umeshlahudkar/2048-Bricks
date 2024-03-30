@@ -29,6 +29,9 @@ public class GameplayController : MonoBehaviour
     private int currentNumber;
     private int nextNumber;
 
+    private bool needToReadjustBlockColumn = false;
+    private bool canMove = true;
+
     private void Start()
     {
         currentTimeDelta = normalTimeDelta;
@@ -45,7 +48,7 @@ public class GameplayController : MonoBehaviour
 
     private int GetBlockNumber()
     {
-        int exponent = Random.Range(1, 7);
+        int exponent = Random.Range(1, 3);
         return (int)Mathf.Pow(2, exponent);
     }
 
@@ -67,17 +70,20 @@ public class GameplayController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+       if(canMove)
         {
-            Move(MoveDirection.Left);
-        }
-        else if(Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            Move(MoveDirection.Right);
-        }
-        else if(Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            currentTimeDelta = fastTimeDelta;
+            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                Move(MoveDirection.Left);
+            }
+            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                Move(MoveDirection.Right);
+            }
+            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                currentTimeDelta = fastTimeDelta;
+            }
         }
 
         elapcedTime += Time.deltaTime;
@@ -120,14 +126,111 @@ public class GameplayController : MonoBehaviour
                 else
                 {
                     // place block
-                    blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor);
-                    SetMoverBlockPos(0, 2);
-                    currentTimeDelta = normalTimeDelta;
+                    canMove = false;
+                    if(needToReadjustBlockColumn)
+                    {
+                        if (IsValid(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                        {
+                            needToReadjustBlockColumn = true;
+                            for (int i = row; i >= 0; i--)
+                            {
+                                if (IsValid(i, col + 1) && blockGrid[i, col + 1].IsEmpty && IsValid(i - 1, col + 1) && !blockGrid[i - 1, col + 1].IsEmpty)
+                                {
+                                    blockGrid[i, col + 1].PlaceBlock(blockGrid[i - 1, col + 1].BlockNumber, blockGrid[i - 1, col + 1].BlockColor);
+                                    blockGrid[i - 1, col + 1].ResetBlock();
+                                }
+                            }
+                        }
 
-                    UpdateBlockNumber();
+                        if (IsValid(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                        {
+                            needToReadjustBlockColumn = true;
+                            for (int i = row; i >= 0; i--)
+                            {
+                                if (IsValid(i, col - 1) && blockGrid[i, col - 1].IsEmpty && IsValid(i - 1, col - 1) && !blockGrid[i - 1, col - 1].IsEmpty)
+                                {
+                                    blockGrid[i, col - 1].PlaceBlock(blockGrid[i - 1, col - 1].BlockNumber, blockGrid[i - 1, col - 1].BlockColor);
+                                    blockGrid[i - 1, col - 1].ResetBlock();
+                                }
+                            }
+                        }
+
+                        needToReadjustBlockColumn = false;
+                    }
+                    else if(CanMergeBlocks())
+                    {
+                        int newNumber = moverBlock.BlockNumber;
+
+                        // vertical down
+                        if (IsValid(row + 1, col) && !blockGrid[row + 1, col].IsEmpty && blockGrid[row + 1, col].BlockNumber == moverBlock.BlockNumber)
+                        {
+                            newNumber += blockGrid[row + 1, col].BlockNumber;
+                            blockGrid[row + 1, col].ResetBlock();
+                        }
+
+                        // horizontal right
+                        if (IsValid(row, col + 1) && !blockGrid[row, col + 1].IsEmpty && blockGrid[row, col + 1].BlockNumber == moverBlock.BlockNumber)
+                        {
+                            newNumber += blockGrid[row, col + 1].BlockNumber;
+                            blockGrid[row, col + 1].ResetBlock();
+
+                            if(IsValid(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                            {
+                                needToReadjustBlockColumn = true;
+                            }
+                        }
+
+                        // horizontal left
+                        if (IsValid(row, col - 1) && !blockGrid[row, col - 1].IsEmpty && blockGrid[row, col - 1].BlockNumber == moverBlock.BlockNumber)
+                        {
+                            newNumber += blockGrid[row, col - 1].BlockNumber;
+                            blockGrid[row, col - 1].ResetBlock();
+
+                            if (IsValid(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                            {
+                                needToReadjustBlockColumn = true;
+                            }
+                        }
+
+                        moverBlock.UpdateBlock(newNumber, blockColorData.GetBlockColor(newNumber));
+                    }
+                    else
+                    {
+                        canMove = true;
+                        blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor);
+                        SetMoverBlockPos(0, 2);
+                        currentTimeDelta = normalTimeDelta;
+
+                        UpdateBlockNumber();
+                    }
                 }
                 break;
         }
+    }
+
+    private bool CanMergeBlocks()
+    {
+        int row = moverBlock.Row_ID;
+        int col = moverBlock.Column_ID;
+
+        bool canMerge = false;
+
+        if(IsValid(row + 1, col) && !blockGrid[row + 1, col].IsEmpty && blockGrid[row + 1, col].BlockNumber == moverBlock.BlockNumber)
+        {
+            canMerge |= true;
+        }
+
+        if (IsValid(row, col + 1) && !blockGrid[row, col + 1].IsEmpty && blockGrid[row, col + 1].BlockNumber == moverBlock.BlockNumber)
+        {
+            canMerge |= true;
+        }
+
+        if (IsValid(row, col - 1) && !blockGrid[row, col - 1].IsEmpty && blockGrid[row, col - 1].BlockNumber == moverBlock.BlockNumber)
+        {
+            canMerge |= true;
+        }
+
+        return canMerge;
     }
 
     private void UpdateBlockNumber()
@@ -136,7 +239,7 @@ public class GameplayController : MonoBehaviour
         nextNumber = GetBlockNumber();
 
         nextNumberText.text = nextNumber.ToString();
-        moverBlock.UpdateBlockNumber(currentNumber, blockColorData.GetBlockColor(currentNumber));
+        moverBlock.UpdateBlock(currentNumber, blockColorData.GetBlockColor(currentNumber));
     }
 
     private bool IsValid(int row, int col)
