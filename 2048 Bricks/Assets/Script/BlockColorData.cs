@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu( fileName = "BlockColorData", menuName = "SO/BlockColorData")]
 public class BlockColorData : ScriptableObject
 {
-    public BlockColor[] blockColors;
+    [SerializeField] private BlockColor[] blockColors;
 
     public Color GetBlockColor(int number)
     {
