@@ -474,7 +474,7 @@ MonoBehaviour:
   moverBlock: {fileID: 1546188275}
   boardGenerator: {fileID: 1943741456}
   blockColorData: {fileID: 11400000, guid: a994026ce4e298c429bef5c4eb809b33, type: 2}
-  normalTimeDelta: 1
+  normalTimeDelta: 0.6
 --- !u!4 &1055265743
 Transform:
   m_ObjectHideFlags: 0
