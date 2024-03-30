@@ -44,7 +44,7 @@ public class GameplayController : MonoBehaviour
 
     private int GetBlockNumber()
     {
-        int exponent = Random.Range(1, 7);
+        int exponent = Random.Range(1, 3);
         return (int)Mathf.Pow(2, exponent);
     }
 
@@ -130,7 +130,7 @@ public class GameplayController : MonoBehaviour
 
             case MoveDirection.Down:
 
-                if (IsValidIndex(row + 1, col) && blockGrid[row + 1, col].IsEmpty)
+                if (!canMoveColumnAfterMerge && IsValidIndex(row + 1, col) && blockGrid[row + 1, col].IsEmpty)
                 {
                     MoveMoverBlockAt(row + 1, col);
                 }
