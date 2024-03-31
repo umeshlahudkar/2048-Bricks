@@ -28,7 +28,7 @@ public class UIController : MonoBehaviour
 
     private void UpdateScore(int currentScore, int highScore)
     {
-        gameplayScoreText.text = "Current Score : " + currentScore.ToString();
+        gameplayScoreText.text = "Score : " + currentScore.ToString();
         gameplayHighScoreText.text = "High Score : " + highScore.ToString();
     }
 
