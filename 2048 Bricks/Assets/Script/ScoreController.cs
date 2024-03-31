@@ -8,10 +8,8 @@ public class ScoreController : MonoBehaviour
     public delegate void ScoreUpdate(int currentScore, int highScore);
     public static ScoreUpdate OnScoreUpdate;
 
-    private void OnEnable()
-    {
-        GameplayController.OnBlockMerge += AddScore;
-    }
+    public int CurrentScore { get { return currentScore; } }
+    public int HighScore { get { return highestScore; } }
 
     private void Start()
     {
@@ -24,24 +22,31 @@ public class ScoreController : MonoBehaviour
         }
     }
 
-    private void AddScore(int value)
+    public void AddScore(int value)
     {
-        currentScore += value;
-
-        if(currentScore > highestScore)
+        if(value >= 0)
         {
-            highestScore = currentScore;
+            currentScore += value;
 
-            SaveData data = SavingSystem.Instance.Load();
-            data.highScore = highestScore;
+            if (currentScore > highestScore)
+            {
+                highestScore = currentScore;
+                SaveHighScore();
+            }
 
-            SavingSystem.Instance.Save(data);
+            if (OnScoreUpdate != null)
+            {
+                OnScoreUpdate.Invoke(currentScore, highestScore);
+            }
         }
+    }
 
-        if(OnScoreUpdate != null)
-        {
-            OnScoreUpdate.Invoke(currentScore, highestScore);
-        }
+    private void SaveHighScore()
+    {
+        SaveData data = SavingSystem.Instance.Load();
+        data.highScore = highestScore;
+
+        SavingSystem.Instance.Save(data);
     }
 
     public void ResetScore()
@@ -51,10 +56,5 @@ public class ScoreController : MonoBehaviour
         {
             OnScoreUpdate.Invoke(currentScore, highestScore);
         }
-    }
-
-    private void OnDisable()
-    {
-        GameplayController.OnBlockMerge -= AddScore;
     }
 }

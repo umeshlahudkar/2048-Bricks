@@ -25,11 +25,18 @@ public class GameplayController : MonoBehaviour
 
     private int[] moverBlockRotation = new int[] {0, 90, 180, 270};
 
-    public delegate void BlockMerge(int newNumber);
-    public static BlockMerge OnBlockMerge;
+    private GameState gameState = GameState.Waiting;
 
-    private void Start()
+    private UIController uiController;
+    private ScoreController scoreController;
+
+   
+    public void StartGame(UIController _uIController, ScoreController _scoreController)
     {
+        uiController = _uIController;
+        scoreController = _scoreController;
+
+        canInput = true;
         currentTimeDelta = normalTimeDelta;
         fastTimeDelta = normalTimeDelta / 4;
 
@@ -38,8 +45,18 @@ public class GameplayController : MonoBehaviour
         Block block = blockGrid[0, 2];
         moverBlock.InitBlock(block.Row_ID, block.Column_ID, block.ThisRectTransform.position, block.ThisRectTransform.sizeDelta);
 
+        moverBlock.gameObject.SetActive(true);
+        nextBlock.gameObject.SetActive(true);
+
         UpdateNextBlock();
         UpdateMoverBlock();
+
+        gameState = GameState.Running;
+    }
+
+    public void SetGameState(GameState gameState)
+    {
+        this.gameState = gameState;
     }
 
     private int GetBlockNumber()
@@ -71,6 +88,8 @@ public class GameplayController : MonoBehaviour
 
     private void Update()
     {
+        if(gameState != GameState.Running) { return; }
+
         if(canInput)
         {
             if(Input.GetKeyDown(KeyCode.Space))
@@ -206,11 +225,8 @@ public class GameplayController : MonoBehaviour
                         }
 
                         moverBlock.UpdateBlock(newNumber, blockColorData.GetBlockColor(newNumber), moverBlock.RotationAngle);
-                        
-                        if(OnBlockMerge != null)
-                        {
-                            OnBlockMerge.Invoke(newNumber);
-                        }
+
+                        scoreController.AddScore(newNumber);
                     }
                     else
                     {
@@ -226,7 +242,7 @@ public class GameplayController : MonoBehaviour
                         }
                         else
                         {
-                            Debug.Log("Game over");
+                            uiController.OpenGameOverScreen();
                         }
                         
                     }
@@ -272,6 +288,32 @@ public class GameplayController : MonoBehaviour
     {
         return (row >= 0 && row < this.gridRows && col >= 0 && col < gridColoumns);
     }
+
+    public void ResetGameplay()
+    {
+        if(blockGrid != null)
+        {
+            for(int i = 0; i < gridRows; i++)
+            {
+                for(int j = 0; j < gridColoumns; j++)
+                {
+                    Destroy(blockGrid[i, j].gameObject);
+                }
+            }
+
+            blockGrid = null;
+        }
+
+        gameState = GameState.Waiting;
+        currentTimeDelta = 0;
+        elapcedTime = 0;
+
+        canInput = false;
+        canMoveColumnAfterMerge = false;
+
+        nextBlock.ResetBlock();
+        moverBlock.ResetBlock();
+    }
    
 }
 
@@ -282,4 +324,12 @@ public enum MoveDirection
     Left,
     Right,
     Down
+}
+
+public enum GameState
+{
+    Waiting,
+    Running,
+    Paused,
+    GameOver
 }

@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SavingSystem : Singleton<SavingSystem>
 {
-    [SerializeField] private string key = "GameData";
+    private string key = "GameData";
 
     protected override void Awake()
     {
