@@ -27,7 +27,10 @@ public class GameplayController : MonoBehaviour
     private UIController uiController;
     private ScoreController scoreController;
 
-   
+    private Vector2 startPos;
+    private float minSwipeDistance = 5f;
+
+
     public void StartGame(UIController _uIController, ScoreController _scoreController)
     {
         uiController = _uIController;
@@ -87,24 +90,13 @@ public class GameplayController : MonoBehaviour
     {
         if(gameState != GameState.Running) { return; }
 
-        if(canInput)
+        if (canInput)
         {
-            if(Input.GetKeyDown(KeyCode.Space))
-            {
-                Rotate();
-            }
-            else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                Move(MoveDirection.Left);
-            }
-            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                Move(MoveDirection.Right);
-            }
-            else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                currentTimeDelta = fastTimeDelta;
-            }
+#if UNITY_WINDOWS
+            HandleKeyboardInput();
+#elif UNITY_ANDROID
+            HandleTouchInput();
+#endif
         }
 
         elapcedTime += Time.deltaTime;
@@ -112,6 +104,74 @@ public class GameplayController : MonoBehaviour
         {
             Move(MoveDirection.Down);
             elapcedTime = 0;
+        }
+    }
+
+    private void HandleKeyboardInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Rotate();
+        }
+        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            Move(MoveDirection.Left);
+        }
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            Move(MoveDirection.Right);
+        }
+        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            currentTimeDelta = fastTimeDelta;
+        }
+    }
+
+    private void HandleTouchInput()
+    {
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0); 
+
+            if (touch.phase == TouchPhase.Began)
+            {
+                startPos = touch.position;
+            }
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                Vector2 swipeDelta = touch.position - startPos;
+                float swipeDistance = swipeDelta.magnitude;
+
+                if (swipeDistance < minSwipeDistance)
+                {
+                    Rotate();
+                }
+                else
+                {
+                    if (Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y))
+                    {
+                        if (swipeDelta.x > 0)
+                        {
+                            Move(MoveDirection.Right);
+                        }
+                        else
+                        {
+                            Move(MoveDirection.Left);
+                        }
+                    }
+                    else
+                    {
+                        if (swipeDelta.y > 0)
+                        {
+                            Rotate();
+                        }
+                        else
+                        {
+                            currentTimeDelta = fastTimeDelta;
+                        }
+                    }
+                }
+            }
         }
     }
 
