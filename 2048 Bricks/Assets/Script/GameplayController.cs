@@ -92,7 +92,7 @@ public class GameplayController : MonoBehaviour
 
         if (canInput)
         {
-#if UNITY_WINDOWS
+#if UNITY_WINDOWS || UNITY_EDITOR
             HandleKeyboardInput();
 #elif UNITY_ANDROID
             HandleTouchInput();
@@ -252,17 +252,17 @@ public class GameplayController : MonoBehaviour
                         if (CanMoverBlockMergeWith(row + 1, col))
                         {
                             newNumber += blockGrid[row + 1, col].BlockNumber;
-                            blockGrid[row + 1, col].ResetBlock();
+                            blockGrid[row + 1, col].MoveAt(moverBlock.ThisRectTransform.position);
                         }
 
                         // horizontal right
                         if (CanMoverBlockMergeWith(row, col + 1))
                         {
                             newNumber += blockGrid[row, col + 1].BlockNumber;
-                            blockGrid[row, col + 1].ResetBlock();
+                            blockGrid[row, col + 1].MoveAt(moverBlock.ThisRectTransform.position);
 
                             // checks for - after merge if any blocks are in coloumn of the merged blocks
-                            if(IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                            if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                             {
                                 canMoveColumnAfterMerge = true;
                             }
@@ -272,7 +272,7 @@ public class GameplayController : MonoBehaviour
                         if (CanMoverBlockMergeWith(row, col - 1))
                         {
                             newNumber += blockGrid[row, col - 1].BlockNumber;
-                            blockGrid[row, col - 1].ResetBlock();
+                            blockGrid[row, col - 1].MoveAt(moverBlock.ThisRectTransform.position);
 
                             // checks for - after merge if any blocks are in coloumn of the merged blocks
                             if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
@@ -301,7 +301,6 @@ public class GameplayController : MonoBehaviour
                         {
                             uiController.OpenGameOverScreen();
                         }
-                        
                     }
                 }
                 break;

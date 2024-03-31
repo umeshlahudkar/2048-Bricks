@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class Block : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class Block : MonoBehaviour
     private bool isEmpty;
     private int blockNumber;
     private int rotationAngle;
+
+    private Vector3 initialPos;
 
     private Color blockColor;
 
@@ -38,6 +41,7 @@ public class Block : MonoBehaviour
         rectTransform.sizeDelta = size;
         gameObject.name = name;
         isEmpty = true;
+        initialPos = rectTransform.position;
     }
 
     public void InitBlock(int row, int col, Vector3 pos, Vector2 size)
@@ -46,6 +50,7 @@ public class Block : MonoBehaviour
         columnID = col;
         rectTransform.position = pos;
         rectTransform.sizeDelta = size;
+        initialPos = rectTransform.position;
     }
 
     public void PlaceBlock(int number, Color color, int rotation)
@@ -55,7 +60,7 @@ public class Block : MonoBehaviour
         numbetText.text = number.ToString();
         blockColor = color;
         blockImg.color = blockColor;
-        Rotate(rotation);
+        Rotate(rotation, false);
         gameObject.SetActive(true);
     }
 
@@ -67,18 +72,31 @@ public class Block : MonoBehaviour
         numbetText.text = blockNumber.ToString();
         blockImg.color = blockColor;
 
-        Rotate(rotation);
+        Rotate(rotation, false);
     }
 
-    public void Rotate(int rotation)
+    public void Rotate(int rotation, bool canPlayRotateEffect = true)
     {
-        if(rotation >= 360)
-        {
-            rotation = 0;
-        }
-
+        if(rotation >= 360) { rotation = 0; }
         rotationAngle = rotation;
-        rectTransform.eulerAngles = new Vector3(0, 0, rotationAngle);
+
+        if(canPlayRotateEffect)
+        {
+            rectTransform.DORotate(new Vector3(0, 0, rotationAngle), 0.1f);
+        }
+        else
+        {
+            rectTransform.eulerAngles = new Vector3(0, 0, rotationAngle);
+        }
+    }
+
+    public void MoveAt(Vector3 pos)
+    {
+        rectTransform.DOMove(pos, 0.1f).OnComplete(() => 
+        {
+            rectTransform.position = initialPos;
+            ResetBlock();
+        });
     }
 
     public void ResetBlock()
