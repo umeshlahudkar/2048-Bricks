@@ -218,61 +218,14 @@ public class GameplayController : MonoBehaviour
 
                     if (canMoveColumnAfterMerge)
                     {
-                        if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                        if (IsValidIndex(row, col + 1) && blockGrid[row, col + 1].IsEmpty && IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                         {
-                            int blockMoveCount = 0;
-                            for(int i = row - 1; i >=0; i--)
-                            {
-                                if (IsValidIndex(i, col + 1) && blockGrid[i, col + 1].IsEmpty)
-                                {
-                                    break;
-                                }
-
-                                blockMoveCount = i;
-                            }
-
-                            for (int i = row; i > blockMoveCount; i--)
-                            {
-                                if (IsValidIndex(i, col + 1) && /*blockGrid[i, col + 1].IsEmpty &&*/ IsValidIndex(i - 1, col + 1) /*&& !blockGrid[i - 1, col + 1].IsEmpty*/)
-                                {
-                                    Block blockToBePlaced = blockGrid[i - 1, col + 1];
-                                    Block blokToBePlacedOn = blockGrid[i, col + 1];
-
-                                    //blokToBePlacedOn.PlaceBlock(blockToBePlaced.BlockNumber, blockToBePlaced.BlockColor, blockToBePlaced.RotationAngle);
-                                    //blockToBePlaced.ResetBlock();
-
-                                    blokToBePlacedOn.PlaceBlock(blockToBePlaced);
-                                }
-                            }
+                            MoveColumnFrom(row - 1, col + 1);
                         }
 
-                        if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                        if (IsValidIndex(row, col - 1) && blockGrid[row, col - 1].IsEmpty && IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
                         {
-                            int blockMoveCount = 0;
-                            for (int i = row - 1; i >= 0; i--)
-                            {
-                                if (IsValidIndex(i, col - 1) && blockGrid[i, col - 1].IsEmpty)
-                                {
-                                    break;
-                                }
-
-                                blockMoveCount = i;
-                            }
-
-                            for (int i = row; i > blockMoveCount; i--)
-                            {
-                                if (IsValidIndex(i, col - 1) /*&& blockGrid[i, col - 1].IsEmpty*/ && IsValidIndex(i - 1, col - 1) /*&& !blockGrid[i - 1, col - 1].IsEmpty*/)
-                                {
-
-                                    Block blockToBePlaced = blockGrid[i - 1, col - 1];
-                                    Block blokToBePlacedOn = blockGrid[i, col - 1];
-
-                                    //blokToBePlacedOn.PlaceBlock(blockToBePlaced.BlockNumber, blockToBePlaced.BlockColor, blockToBePlaced.RotationAngle);
-                                    //blockToBePlaced.ResetBlock();
-
-                                    blokToBePlacedOn.PlaceBlock(blockToBePlaced);
-                                }
-                            }
+                            MoveColumnFrom(row - 1, col - 1);
                         }
 
                         canMoveColumnAfterMerge = false;
@@ -297,7 +250,7 @@ public class GameplayController : MonoBehaviour
 
                             blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
 
-                            // checks for - after merge if any blocks are in coloumn of the merged blocks
+                            // checks for - after merge if any blocks in the coloumn, can move down
                             if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
                             {
                                 canMoveColumnAfterMerge = true;
@@ -312,7 +265,7 @@ public class GameplayController : MonoBehaviour
 
                             blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
 
-                            // checks for - after merge if any blocks are in coloumn of the merged blocks
+                            // checks for - after merge if any blocks in the coloumn, can move down
                             if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
                             {
                                 canMoveColumnAfterMerge = true;
@@ -342,6 +295,28 @@ public class GameplayController : MonoBehaviour
                     }
                 }
                 break;
+        }
+    }
+
+    private void MoveColumnFrom(int row, int col)
+    {
+        int blockMoveCount = 0;
+        for (int i = row; i >= 0; i--)
+        {
+            if (IsValidIndex(i, col) && blockGrid[i, col].IsEmpty) { break; }
+            blockMoveCount = i;
+        }
+
+        for (int i = row + 1; i > blockMoveCount; i--)
+        {
+            if (IsValidIndex(i, col) && IsValidIndex(i - 1, col))
+            {
+
+                Block blockToBePlaced = blockGrid[i - 1, col];
+                Block blokToBePlacedOn = blockGrid[i, col];
+
+                blokToBePlacedOn.PlaceBlock(blockToBePlaced);
+            }
         }
     }
 
