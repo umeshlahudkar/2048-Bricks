@@ -34,6 +34,11 @@ public class Block : MonoBehaviour
 
     public Color BlockColor { get { return blockColor; } }
 
+
+    /// <summary>
+    /// gets called for the grid blocks
+    /// </summary>
+    
     public void InitBlock(int row, int col, Vector3 pos, Vector2 size, string name)
     {
         rowID = row;
@@ -45,6 +50,9 @@ public class Block : MonoBehaviour
         initialPos = rectTransform.position;
     }
 
+    /// <summary>
+    /// gets called for the mover block
+    /// </summary>
     public void InitBlock(int row, int col, Vector3 pos, Vector2 size)
     {
         rowID = row;
@@ -54,6 +62,9 @@ public class Block : MonoBehaviour
         initialPos = rectTransform.position;
     }
 
+    /// <summary>
+    /// assigns block number, color and rotation to this block
+    /// </summary>
     public void PlaceBlock(int number, Color color, int rotation)
     {
         isEmpty = false;
@@ -65,6 +76,10 @@ public class Block : MonoBehaviour
         gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// moves the placeble block from it's current position to this block and copies the number and color
+    /// </summary>
+    /// <param name="blockToBePlaced"> the blocks whose number, color gets copied to this block </param>
     public void PlaceBlock(Block blockToBePlaced)
     {
         blockToBePlaced.MoveAt(rectTransform.position, () =>
@@ -74,6 +89,9 @@ public class Block : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Updates block number, color and rotation
+    /// </summary>
     public void UpdateBlock(int number, Color color, int rotation = 0)
     {
         blockNumber = number;
@@ -105,7 +123,6 @@ public class Block : MonoBehaviour
         rectTransform.DOMove(pos, 0.15f).OnComplete(() => 
         {
             rectTransform.position = initialPos;
-            //ResetBlock();
             onMovedCallback?.Invoke();
         });
     }

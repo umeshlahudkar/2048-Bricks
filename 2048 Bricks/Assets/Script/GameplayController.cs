@@ -59,17 +59,28 @@ public class GameplayController : MonoBehaviour
         this.gameState = gameState;
     }
 
+    /// <summary>
+    /// return the random number in two's power like 2, 4, 8...upto 64
+    /// </summary>
     private int GetBlockNumber()
     {
-        int exponent = Random.Range(1, 3);
+        int exponent = Random.Range(1, 7);
         return (int)Mathf.Pow(2, exponent);
     }
 
+
+    /// <summary>
+    /// return random rotation angle between 0, 90, 180, 270
+    /// </summary>
+    /// <returns></returns>
     private int GetBlockRotation()
     {
         return moverBlockRotation[Random.Range(0, moverBlockRotation.Length)];
     }
 
+    /// <summary>
+    /// initialize grid array
+    /// </summary>
     public void InitGrid(int row, int col)
     {
         this.gridRows = row;
@@ -77,6 +88,9 @@ public class GameplayController : MonoBehaviour
         blockGrid = new Block[row, col];
     }
 
+    /// <summary>
+    /// Moves Mover block at the specified index
+    /// </summary>
     private void MoveMoverBlockAt(int row, int col)
     {
         if(IsValidIndex(row, col))
