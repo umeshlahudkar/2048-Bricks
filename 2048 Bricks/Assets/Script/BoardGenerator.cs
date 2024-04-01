@@ -15,7 +15,21 @@ public class BoardGenerator : MonoBehaviour
     public void GenerateBoard(GameplayController gameplayController)
     {
         float screenWidth = canvasRect.rect.width;
-        float totalWidth = screenWidth * 0.80f;
+        float screenHeight = canvasRect.rect.height;
+        float totalWidth = 0f;
+
+        if (screenWidth > screenHeight) // for windows build
+        {
+            totalWidth = screenHeight * 0.60f;
+            transform.localPosition = new Vector3(0, 0, 0);
+        }
+        else // for android build
+        {
+            if (screenWidth > 1080) { screenWidth = 1080f; }
+            totalWidth = screenWidth * 0.80f;
+            transform.localPosition = new Vector3(0, 0, 0);
+        }
+
 
         float totalSpace = totalWidth * 0.10f;
         float blockSpace = totalSpace / (colums + 1);

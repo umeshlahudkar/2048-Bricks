@@ -51,7 +51,7 @@ public class Block : MonoBehaviour
     }
 
     /// <summary>
-    /// gets called for the mover block
+    /// gets called for the mover block and Next block
     /// </summary>
     public void InitBlock(int row, int col, Vector3 pos, Vector2 size)
     {
@@ -60,6 +60,8 @@ public class Block : MonoBehaviour
         rectTransform.position = pos;
         rectTransform.sizeDelta = size;
         initialPos = rectTransform.position;
+
+        gameObject.SetActive(true);
     }
 
     /// <summary>

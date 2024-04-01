@@ -44,9 +44,7 @@ public class GameplayController : MonoBehaviour
 
         Block block = blockGrid[0, 2];
         moverBlock.InitBlock(block.Row_ID, block.Column_ID, block.ThisRectTransform.position, block.ThisRectTransform.sizeDelta);
-
-        moverBlock.gameObject.SetActive(true);
-        nextBlock.gameObject.SetActive(true);
+        nextBlock.InitBlock(0, 0, block.ThisRectTransform.position + new Vector3(0, block.ThisRectTransform.sizeDelta.x, 0), block.ThisRectTransform.sizeDelta/2);
 
         UpdateNextBlock();
         UpdateMoverBlock();
