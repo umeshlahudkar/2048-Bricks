@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class Block : MonoBehaviour
 {
@@ -64,6 +65,15 @@ public class Block : MonoBehaviour
         gameObject.SetActive(true);
     }
 
+    public void PlaceBlock(Block blockToBePlaced)
+    {
+        blockToBePlaced.MoveAt(rectTransform.position, () =>
+        {
+            PlaceBlock(blockToBePlaced.blockNumber, blockToBePlaced.blockColor, blockToBePlaced.rotationAngle);
+            blockToBePlaced.ResetBlock();
+        });
+    }
+
     public void UpdateBlock(int number, Color color, int rotation = 0)
     {
         blockNumber = number;
@@ -82,7 +92,7 @@ public class Block : MonoBehaviour
 
         if(canPlayRotateEffect)
         {
-            rectTransform.DORotate(new Vector3(0, 0, rotationAngle), 0.1f);
+            rectTransform.DORotate(new Vector3(0, 0, rotationAngle), 0.15f);
         }
         else
         {
@@ -90,12 +100,13 @@ public class Block : MonoBehaviour
         }
     }
 
-    public void MoveAt(Vector3 pos)
+    public void MoveAt(Vector3 pos, UnityAction onMovedCallback = null)
     {
-        rectTransform.DOMove(pos, 0.1f).OnComplete(() => 
+        rectTransform.DOMove(pos, 0.15f).OnComplete(() => 
         {
             rectTransform.position = initialPos;
-            ResetBlock();
+            //ResetBlock();
+            onMovedCallback?.Invoke();
         });
     }
 
