@@ -106,7 +106,7 @@ public class GameplayController : MonoBehaviour
 
         if (canInput)
         {
-#if UNITY_WINDOWS || UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
             HandleKeyboardInput();
 #elif UNITY_ANDROID
             HandleTouchInput();
