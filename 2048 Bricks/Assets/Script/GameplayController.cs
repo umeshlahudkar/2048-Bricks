@@ -224,89 +224,93 @@ public class GameplayController : MonoBehaviour
                 }
                 else
                 {
-                    // place block
-                    canInput = false;
-                    currentTimeDelta = normalTimeDelta;
-
-                    if (canMoveColumnAfterMerge)
-                    {
-                        if (IsValidIndex(row, col + 1) && blockGrid[row, col + 1].IsEmpty && IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
-                        {
-                            MoveColumnFrom(row - 1, col + 1);
-                        }
-
-                        if (IsValidIndex(row, col - 1) && blockGrid[row, col - 1].IsEmpty && IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
-                        {
-                            MoveColumnFrom(row - 1, col - 1);
-                        }
-
-                        canMoveColumnAfterMerge = false;
-                    }
-                    else if(CanMoverBlockMerge())
-                    {
-                        int mergedNumber = moverBlock.BlockNumber;
-                        // vertical down
-                        if (CanMoverBlockMergeWith(row + 1, col))
-                        {
-                            Block blockToBeMergedIntoMoverBlock = blockGrid[row + 1, col];
-                            mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
-
-                            blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, ()=> blockToBeMergedIntoMoverBlock.ResetBlock() );
-                        }
-
-                        // horizontal right
-                        if (CanMoverBlockMergeWith(row, col + 1))
-                        {
-                            Block blockToBeMergedIntoMoverBlock = blockGrid[row, col + 1];
-                            mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
-
-                            blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
-
-                            // checks for - after merge if any blocks in the coloumn, can move down
-                            if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
-                            {
-                                canMoveColumnAfterMerge = true;
-                            }
-                        }
-
-                        // horizontal left
-                        if (CanMoverBlockMergeWith(row, col - 1))
-                        {
-                            Block blockToBeMergedIntoMoverBlock = blockGrid[row, col - 1];
-                            mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
-
-                            blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
-
-                            // checks for - after merge if any blocks in the coloumn, can move down
-                            if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
-                            {
-                                canMoveColumnAfterMerge = true;
-                            }
-                        }
-
-                        moverBlock.UpdateBlock(mergedNumber, blockColorData.GetBlockColor(mergedNumber), moverBlock.RotationAngle);
-
-                        scoreController.AddScore(mergedNumber);
-                    }
-                    else
-                    {
-                        blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor, moverBlock.RotationAngle);
-
-                        if(!IsGameOver())
-                        {
-                            MoveMoverBlockAt(0, 2);
-
-                            UpdateMoverBlock();
-                            UpdateNextBlock();
-                            canInput = true;
-                        }
-                        else
-                        {
-                            uiController.OpenGameOverScreen();
-                        }
-                    }
+                    HandleBlockMerging(row, col);
                 }
                 break;
+        }
+    }
+
+    private void HandleBlockMerging(int row, int col)
+    {
+        canInput = false;
+        currentTimeDelta = normalTimeDelta;
+
+        if (canMoveColumnAfterMerge)
+        {
+            if (IsValidIndex(row, col + 1) && blockGrid[row, col + 1].IsEmpty && IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+            {
+                MoveColumnFrom(row - 1, col + 1);
+            }
+
+            if (IsValidIndex(row, col - 1) && blockGrid[row, col - 1].IsEmpty && IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+            {
+                MoveColumnFrom(row - 1, col - 1);
+            }
+
+            canMoveColumnAfterMerge = false;
+        }
+        else if (CanMoverBlockMerge())
+        {
+            int mergedNumber = moverBlock.BlockNumber;
+            // vertical down
+            if (CanMoverBlockMergeWith(row + 1, col))
+            {
+                Block blockToBeMergedIntoMoverBlock = blockGrid[row + 1, col];
+                mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
+
+                blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
+            }
+
+            // horizontal right
+            if (CanMoverBlockMergeWith(row, col + 1))
+            {
+                Block blockToBeMergedIntoMoverBlock = blockGrid[row, col + 1];
+                mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
+
+                blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
+
+                // checks for - after merge if any blocks in the coloumn, can move down
+                if (IsValidIndex(row - 1, col + 1) && !blockGrid[row - 1, col + 1].IsEmpty)
+                {
+                    canMoveColumnAfterMerge = true;
+                }
+            }
+
+            // horizontal left
+            if (CanMoverBlockMergeWith(row, col - 1))
+            {
+                Block blockToBeMergedIntoMoverBlock = blockGrid[row, col - 1];
+                mergedNumber += blockToBeMergedIntoMoverBlock.BlockNumber;
+
+                blockToBeMergedIntoMoverBlock.MoveAt(moverBlock.ThisRectTransform.position, () => blockToBeMergedIntoMoverBlock.ResetBlock());
+
+                // checks for - after merge if any blocks in the coloumn, can move down
+                if (IsValidIndex(row - 1, col - 1) && !blockGrid[row - 1, col - 1].IsEmpty)
+                {
+                    canMoveColumnAfterMerge = true;
+                }
+            }
+
+            moverBlock.UpdateBlock(mergedNumber, blockColorData.GetBlockColor(mergedNumber), moverBlock.RotationAngle);
+
+            scoreController.AddScore(mergedNumber);
+        }
+        else
+        {
+            blockGrid[row, col].PlaceBlock(moverBlock.BlockNumber, moverBlock.BlockColor, moverBlock.RotationAngle);
+
+            if (!IsGameOver())
+            {
+                MoveMoverBlockAt(0, 2);
+
+                UpdateMoverBlock();
+                UpdateNextBlock();
+                canInput = true;
+            }
+            else
+            {
+                uiController.OpenGameOverScreen();
+            }
         }
     }
 
